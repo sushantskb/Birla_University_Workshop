@@ -7,9 +7,8 @@ export default function Index() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-      }}
-    >
-      <Text>Notes App</Text>
+      }}>
+      <Text className="text-lg font-bold">Notes App</Text>
     </View>
   );
 }

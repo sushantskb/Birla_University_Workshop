@@ -1,23 +1,83 @@
-# 📝Notes App
+# Setup NativeWind and Tailwind CSS
 
-This project was bootstrapped with `npx create-expo-app@latest`.
+This commit integrates NativeWind and Tailwind CSS for styling the application, enabling utility-first CSS within React Native components.
 
-## Getting Started
+## Changes
 
-1.  **Installation:**
-    * To create this project I used the command `npx create-expo-app@latest ./`. This initialized a new Expo project in the current directory.
-2.  **Starting the Development Server:**
-    * To start the development server, run `npx expo start`. This will open the Expo Developer Tools in your web browser.
-3.  **Resetting the Cache:**
-    * During development, I used `npm run reset` to clear the Metro bundler's cache. This is helpful when encountering issues related to cached files or modules.
+* **Dependency Installation:**
+    * Installed `nativewind`, `tailwindcss@^3.4.17`, `react-native-reanimated@3.16.2`, and `react-native-safe-area-context` using `npx expo install`.
+    * Initialized Tailwind CSS with `npx tailwindcss init`.
+* **Tailwind Configuration:**
+    * Created `tailwind.config.js` with the following configuration:
 
-## Available Scripts
+    ```javascript
+    /** @type {import('tailwindcss').Config} */
+    module.exports = {
+      // NOTE: Update this to include the paths to all of your component files.
+      content: ["./app/**/*.{js,jsx,ts,tsx}"],
+      presets: [require("nativewind/preset")],
+      theme: {
+        extend: {},
+      },
+      plugins: [],
+    }
+    ```
 
-In the project directory, you can run:
+* **Global CSS:**
+    * Created `global.css` with Tailwind's base, components, and utilities imports:
 
-* **`npx expo start` or `npm start`:** Starts the development server.
-* **`npm run android`:** Runs your app on an Android device or emulator.
-* **`npm run ios`:** Runs your app on an iOS device or simulator.
-* **`npm run web`:** Runs your app in a web browser.
-* **`npm run eject`:** Ejects your app and gives you full control over the native projects. (Advanced usage)
-* **`npm run reset`:** Clears the Metro bundler's cache.
+    ```css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+
+* **Babel Configuration:**
+    * Updated `babel.config.js` to include NativeWind's Babel preset:
+
+    ```javascript
+    module.exports = function (api) {
+      api.cache(true);
+      return {
+        presets: [
+          ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+          "nativewind/babel",
+        ],
+      };
+    };
+    ```
+
+* **Metro Configuration:**
+    * Updated `metro.config.js` to integrate NativeWind's Metro plugin and specify the input CSS file:
+
+    ```javascript
+    const { getDefaultConfig } = require("expo/metro-config");
+    const { withNativeWind } = require('nativewind/metro');
+
+    const config = getDefaultConfig(__dirname)
+
+    module.exports = withNativeWind(config, { input: './app/global.css' })
+    ```
+
+* **TypeScript Definition:**
+    * Created `nativewind-env.d.ts` to provide TypeScript type definitions for NativeWind:
+
+    ```typescript
+    /// <reference types="nativewind/types" />
+    ```
+
+## Note
+* ** Error: **
+    * Compilation Error: import should be at the top of the stack.
+    *Run: ``` npx expo start --clear ```
+
+## Purpose
+
+This commit sets up the styling infrastructure for the application, enabling the use of Tailwind CSS's utility classes within React Native components through NativeWind.
+
+## Next Steps
+
+* Begin styling components using Tailwind CSS utility classes.
+* Refactor existing styles to utilize NativeWind.
+* Create reusable component styles.
+* Test and refine the styling across different devices and platforms.
