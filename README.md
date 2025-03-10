@@ -1,50 +1,23 @@
-# Welcome to your Expo app 👋
+# 📝Notes App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This project was bootstrapped with `npx create-expo-app@latest`.
 
-## Get started
+## Getting Started
 
-1. Install dependencies
+1.  **Installation:**
+    * To create this project I used the command `npx create-expo-app@latest ./`. This initialized a new Expo project in the current directory.
+2.  **Starting the Development Server:**
+    * To start the development server, run `npx expo start`. This will open the Expo Developer Tools in your web browser.
+3.  **Resetting the Cache:**
+    * During development, I used `npm run reset` to clear the Metro bundler's cache. This is helpful when encountering issues related to cached files or modules.
 
-   ```bash
-   npm install
-   ```
+## Available Scripts
 
-2. Start the app
+In the project directory, you can run:
 
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+* **`npx expo start` or `npm start`:** Starts the development server.
+* **`npm run android`:** Runs your app on an Android device or emulator.
+* **`npm run ios`:** Runs your app on an iOS device or simulator.
+* **`npm run web`:** Runs your app in a web browser.
+* **`npm run eject`:** Ejects your app and gives you full control over the native projects. (Advanced usage)
+* **`npm run reset`:** Clears the Metro bundler's cache.
