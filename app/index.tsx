@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 export default function Index() {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text className="text-lg font-bold bg-gray-500 p-2 rounded-xl text-white">
+      <Text className="text-xl font-nunito p-2 rounded-xl text-white">
         📝Notes App
       </Text>
       <View className="mt-2 flex-col items-center gap-3">
