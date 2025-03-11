@@ -1,5 +1,6 @@
 import { notes } from "@/constants/data";
 import icons from "@/constants/icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -72,7 +73,9 @@ export default function Index() {
 
         {/* Add Notes */}
         <View className="absolute bottom-6 right-6 bg-secondary p-4  rounded-full shadow-2xl">
-          <Image source={icons.plus} className="size-8" tintColor={"white"} />
+          <TouchableOpacity onPress={() => router.push('/add-notes')}>
+            <Image source={icons.plus} className="size-8" tintColor={"white"} />
+          </TouchableOpacity>
         </View>
       </View>
     </GestureHandlerRootView>

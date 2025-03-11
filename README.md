@@ -1,103 +1,152 @@
-# Created Home UI
+# Created Add Notes UI
 
-This commit implements the Home screen UI, providing a list of notes with swipe-to-delete functionality and an "Add Notes" button.
+This commit implements the Add Notes screen UI, allowing users to create new notes with a title, content, and color selection.
 
 <details>
 <summary><strong>Changes</strong></summary>
 
-* **Dependency Installation:**
-    * Installed `react-native-swipe-list-view` and `react-native-gesture-handler` using `npm install`.
-* **Home Screen Implementation (`index.tsx`):**
-    * Imported necessary modules from React Native and installed libraries.
-    * Used `GestureHandlerRootView` to wrap the screen for swipe functionality.
-    * Implemented a header with the app title and search/info icons.
-    * Utilized `SwipeListView` to display a list of notes, allowing swipe actions.
-    * Implemented `renderItem` to display each note with dynamic background colors based on note color.
-    * Implemented `renderHiddenItem` to display a delete button on swipe.
-    * Added `handleDelete` function to remove notes from the list.
-    * Added an "Add Notes" button with a plus icon.
-    * Used data from `constants/data` and icons from `constants/icons`.
+* **Add Notes Screen Implementation (`add-notes.tsx`):**
+    * Imported necessary modules from React Native and Expo Router.
+    * Used `KeyboardAvoidingView` to handle keyboard interactions.
+    * Implemented a header with a back button and save/preview icons.
+    * Used a `TextEditor` component for title, content, and color input.
+    * Added state variables for title, content, and color using `useState`.
+    * Implemented `handleSave` function to log the note details (to be replaced with actual save logic).
     * Used Tailwind CSS classes for styling.
-    * Added type for note colors.
 
 ```typescript
-import { notes } from "@/constants/data";
+import {
+  View,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import React, { useState } from "react";
 import icons from "@/constants/icons";
-import { useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SwipeListView } from "react-native-swipe-list-view";
-export default function Index() {
-  type ColorType = "red" | "green" | "yellow" | "blue" | "purple";
-  const colorStyles: Record<ColorType, { backgroundColor: string }> = {
-    red: { backgroundColor: "#fca5a5" },
-    green: { backgroundColor: "#86efac" },
-    yellow: { backgroundColor: "#fde047" },
-    blue: { backgroundColor: "#93c5fd" },
-    purple: { backgroundColor: "#d8b4fe" },
-  };
-  const [notesList, setNotesList] = useState(notes);
+import { router } from "expo-router";
+import TextEditor from "@/components/TextEditor";
 
-  const handleDelete = (id: string) => {
-    setNotesList((prevNotes) => prevNotes.filter((note) => note.id !== id));
+const AddNotes = () => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [color, setColor] = useState("");
+  const handleSave = () => {
+    console.log("Title", title, "Content", content, "Color", color);
+  };
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-primary p-4">
+      <View className="flex-row justify-between items-center mb-4">
+        <TouchableOpacity
+          className="p-2 bg-secondary rounded-full"
+          onPress={() => router.push("/")}>
+          <Image
+            source={icons.backArrow}
+            className="size-8"
+            tintColor={"white"}
+          />
+        </TouchableOpacity>
+        <View className="flex-row gap-4">
+          <TouchableOpacity className="bg-secondary p-2 rounded-full">
+            <Image source={icons.eye} className="size-6" tintColor="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-secondary p-2 rounded-full"
+            onPress={handleSave}>
+            <Image source={icons.save} className="size-6" tintColor="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <TextEditor
+        title={title}
+        content={content}
+        color={color}
+        setTitle={setTitle}
+        setContent={setContent}
+        setColor={setColor}
+      />
+    </KeyboardAvoidingView>
+  );
+};
+
+export default AddNotes;
+```
+
+```typescript
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+} from "react-native";
+import React, { useState } from "react";
+
+export default function TextEditor({
+  title,
+  content,
+  color,
+  setTitle,
+  setContent,
+  setColor,
+}: {
+  title: string;
+  content: string;
+  color: string;
+  setTitle: (text: string) => void;
+  setContent: (text: string) => void;
+  setColor: (text: string) => void;
+}) {
+  type colorType = "red" | "purple" | "yellow" | "blue" | "green";
+  const colors: Record<colorType, string> = {
+    red: "border-red-500",
+    purple: "border-purple-500",
+    yellow: "border-yellow-500",
+    blue: "border-blue-500",
+    green: "border-green-500",
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="flex-1 bg-primary p-4">
-        {/* Header */}
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-2xl font-nunito-bold text-white">📝Notes</Text>
-          <View className="flex-row gap-4">
-            <View className="bg-secondary p-2 rounded-xl">
-              <Image
-                source={icons.search}
-                alt="search-icon"
-                tintColor={"white"}
-                className="size-5"
-              />
-            </View>
-            <View className="bg-secondary p-2 rounded-xl">
-              <Image
-                source={icons.info}
-                alt="search-icon"
-                tintColor={"white"}
-                className="size-5"
-              />
-            </View>
-          </View>
-        </View>
+    <View className="flex-1">
+      {/* Title Input */}
+      <TextInput
+        placeholder="Title"
+        placeholderTextColor="#aaa"
+        value={title}
+        onChangeText={setTitle}
+        className="text-3xl text-gray-100 font-semibold mb-2"
+      />
 
-        {/* Notes List */}
-        <SwipeListView
-          data={notesList}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View
-              className={`p-4 my-2 rounded-lg`}
-              style={colorStyles[item.color as ColorType]}>
-              <Text className="text-lg font-nunito">{item.text}</Text>
-            </View>
-          )}
-          renderHiddenItem={({ item }) => (
-            <View className="justify-center items-center bg-red-500 rounded-lg m-2 px-4 py-[5px] absolute top-0 bottom-0 right-0">
-              <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                <Image
-                  source={icons.trash}
-                  className="size-12"
-                  tintColor="white"
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-          rightOpenValue={-75}
-        />
+      <TextInput
+        placeholder="Type something..."
+        placeholderTextColor="#666"
+        multiline
+        value={content}
+        onChangeText={setContent}
+        className="text-lg text-gray-300"
+      />
 
-        {/* Add Notes */}
-        <View className="absolute bottom-6 right-6 bg-secondary p-4  rounded-full shadow-2xl">
-          <Image source={icons.plus} className="size-8" tintColor={"white"} />
+      {/* Color */}
+      <View className="absolute bottom-4">
+        <View className="flex-row flex-wrap p-2 gap-2 justify-center items-center">
+          {["red", "purple", "yellow", "blue", "green"].map((item, index) => (
+            <TouchableOpacity key={index} onPress={() => setColor(item)}>
+              <Text
+                key={index}
+                className={`border px-6 py-1 rounded-xl text-white ${
+                  colors[item as colorType]
+                } ${color === item ? "bg-black" : ""}`}>
+                {item.toLocaleUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
-    </GestureHandlerRootView>
+    </View>
   );
 }
+```
