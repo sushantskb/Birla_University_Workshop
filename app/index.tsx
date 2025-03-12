@@ -28,12 +28,14 @@ export default function Index() {
           <Text className="text-2xl font-nunito-bold text-white">📝Notes</Text>
           <View className="flex-row gap-4">
             <View className="bg-secondary p-2 rounded-xl">
-              <Image
-                source={icons.search}
-                alt="search-icon"
-                tintColor={"white"}
-                className="size-5"
-              />
+              <TouchableOpacity onPress={() => router.push("/search")}>
+                <Image
+                  source={icons.search}
+                  alt="search-icon"
+                  tintColor={"white"}
+                  className="size-5"
+                />
+              </TouchableOpacity>
             </View>
             <View className="bg-secondary p-2 rounded-xl">
               <Image
@@ -73,7 +75,7 @@ export default function Index() {
 
         {/* Add Notes */}
         <View className="absolute bottom-6 right-6 bg-secondary p-4  rounded-full shadow-2xl">
-          <TouchableOpacity onPress={() => router.push('/add-notes')}>
+          <TouchableOpacity onPress={() => router.push("/add-notes")}>
             <Image source={icons.plus} className="size-8" tintColor={"white"} />
           </TouchableOpacity>
         </View>

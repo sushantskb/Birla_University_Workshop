@@ -39,7 +39,7 @@ export default function TextEditor({
         placeholderTextColor="#aaa"
         value={title}
         onChangeText={setTitle}
-        className="text-3xl text-gray-100 font-semibold mb-2"
+        className="text-3xl text-gray-100 font-nunito-semibold mb-2"
       />
 
       <TextInput
@@ -48,7 +48,7 @@ export default function TextEditor({
         multiline
         value={content}
         onChangeText={setContent}
-        className="text-lg text-gray-300"
+        className="text-lg font-nunito text-gray-300"
       />
 
       {/* Color */}
@@ -58,7 +58,7 @@ export default function TextEditor({
             <TouchableOpacity key={index} onPress={() => setColor(item)}>
               <Text
                 key={index}
-                className={`border px-6 py-1 rounded-xl text-white ${
+                className={`border px-6 py-1 rounded-xl font-nunito text-white ${
                   colors[item as colorType]
                 } ${color === item ? "bg-black" : ""}`}>
                 {item.toLocaleUpperCase()}
