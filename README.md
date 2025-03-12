@@ -1,56 +1,108 @@
-# Commit: Created Modal Component
+#  Setup Appwrite Integration
 
-This commit introduces a reusable modal component for displaying overlay content and integrates it into the Add Notes screen.
+This commit integrates Appwrite into the project for backend data storage and retrieval.
 
 <details>
 <summary><strong>Changes</strong></summary>
 
-* **Modal Component Implementation (`components/Modal.tsx`):**
-    * Created a new component named `CustomModal` within the `components` directory.
-    * Implemented a modal overlay using `Modal` from `react-native`, with a semi-transparent background.
-    * Included a container with a white background and rounded corners for modal content.
-    * Added props to control the modal's visibility (`visible: boolean`), close the modal (`onClose: () => void`), handle save action (`onSave?: () => void`), and display dynamic text (`text: string`).
-    * Used Tailwind CSS classes for styling.
-    * Added icons from the constant folder.
-    * Added discard and save buttons.
+* **Appwrite Setup:**
+    * Created an Appwrite account and project.
+    * Created a database and collection for notes, with appropriate attributes (title, content, color).
+* **Environment Variables:**
+    * Created an `.env` file to store Appwrite configuration variables:
 
-```typescript
-// Modal.tsx
-import { View, Text, Modal, Image, TouchableOpacity } from "react-native";
-import React from "react";
-import icons from "@/constants/icons";
-interface ModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSave?: () => void;
-  text: string;
-}
-export default function CustomModal({
-  visible,
-  onSave,
-  onClose,
-  text,
-}: ModalProps) {
-  return (
-    <Modal transparent visible animationType="fade">
-      <View className="flex-1 justify-center items-center bg-primary/50">
-        <View className="bg-secondary rounded-lg p-5 w-80 items-center">
-          <Image source={icons.info} className="size-10" tintColor={"white"} />
-          <Text className="text-white font-nunito text-xl mt-2">{text}</Text>
-          <View className="flex-row mt-4 gap-4">
-            <TouchableOpacity
-              className="bg-red-600 px-6 py-3 rounded-md"
-              onPress={onClose}>
-              <Text className="text-white font-nunito">Discard</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-green-600 px-6 py-3 rounded-md"
-              onPress={onSave}>
-              <Text className="text-white font-nunito">Save</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
+    ```
+    EXPO_PUBLIC_APPWRITE_PROJECT_ID=<your_appwrite_id>
+    EXPO_PUBLIC_APPWRITE_ENDPOINT=[https://cloud.appwrite.io/v1](https://cloud.appwrite.io/v1)
+    EXPO_PUBLIC_APPWRITE_DATABASEID=<your_database_id>
+    EXPO_PUBLIC_APPWRITE_NOTES_COLLECTIONID=<your_collection_id>
+    ```
+
+* **Appwrite SDK Integration (`lib/appwrite.ts`):**
+    * Installed the `react-native-appwrite` SDK.
+    * Created `lib/appwrite.ts` to initialize the Appwrite client and define database functions.
+    * Configured the Appwrite client using environment variables.
+    * Implemented `getAllNotes` function to retrieve all notes from the database.
+    * Implemented `getNotesById` function to retrieve a specific note by id.
+    * Implemented `addNote` function to add a new note to the database.
+
+    ```typescript
+    import { Client, Databases, ID } from "react-native-appwrite";
+    export const config = {
+      platform: "com.skb.noteapp",
+      endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
+      projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID,
+      databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASEID,
+      notesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_NOTES_COLLECTIONID,
+    };
+
+    export const client = new Client();
+
+    client
+      .setEndpoint(config.endpoint!)
+      .setProject(config.projectId!)
+      .setPlatform(config.platform!);
+
+    const databases = new Databases(client);
+
+    export async function getAllNotes() {
+      try {
+        const result = await databases.listDocuments(
+          config.databaseId!,
+          config.notesCollectionId!
+        );
+
+        return result.documents;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    export async function getNotesById(id: string) {
+      try {
+        const note = await databases.getDocument(
+          config.databaseId!,
+          config.notesCollectionId!,
+          id
+        );
+        return note;
+      } catch (error) {}
+    }
+
+    export async function addNote(title: string, content: string, color: string) {
+      try {
+        await databases.createDocument(
+          config.databaseId!,
+          config.notesCollectionId!,
+          ID.unique(),
+          {
+            title: title,
+            content: content,
+            color: color,
+          }
+        );
+        return console.log("Notes Added");
+      } catch (error) {
+        console.log("Error in adding notes:", error);
+      }
+    }
+    ```
+
+</details>
+
+<details>
+<summary><strong>Purpose</strong></summary>
+
+This commit establishes the backend infrastructure for the application, enabling persistent storage and retrieval of notes using Appwrite.
+</details>
+
+<details>
+<summary><strong>Next Steps</strong></summary>
+
+* Integrate the Appwrite functions into the application's UI components (Home, Add Notes, etc.).
+* Implement error handling and loading states for Appwrite requests.
+* Add functionality to update and delete notes.
+* Secure Appwrite API keys and database access.
+* Test Appwrite integration thoroughly.
+* Implement Appwrite authentication.
+</details>
