@@ -1,108 +1,81 @@
-#  Setup Appwrite Integration
+# Created NotFound and Empty Components
 
-This commit integrates Appwrite into the project for backend data storage and retrieval.
+This commit introduces `NotFound` and `Empty` components to handle scenarios where data is missing or not found.
 
 <details>
 <summary><strong>Changes</strong></summary>
 
-* **Appwrite Setup:**
-    * Created an Appwrite account and project.
-    * Created a database and collection for notes, with appropriate attributes (title, content, color).
-* **Environment Variables:**
-    * Created an `.env` file to store Appwrite configuration variables:
+- **NotFound Component:**
+  _ Created a `NotFound` component (likely `NotFound.tsx` in the `components` directory).
+  _ This component displays a message indicating that requested data or content was not found.
+  _ It may include an icon or image to visually represent the "not found" state.
+  _ Used Tailwind CSS classes for styling.
 
-    ```
-    EXPO_PUBLIC_APPWRITE_PROJECT_ID=<your_appwrite_id>
-    EXPO_PUBLIC_APPWRITE_ENDPOINT=[https://cloud.appwrite.io/v1](https://cloud.appwrite.io/v1)
-    EXPO_PUBLIC_APPWRITE_DATABASEID=<your_database_id>
-    EXPO_PUBLIC_APPWRITE_NOTES_COLLECTIONID=<your_collection_id>
-    ```
+      ```typescript
+      // components/NotFound.tsx (Example)
+      import { View, Text, Image } from "react-native";
 
-* **Appwrite SDK Integration (`lib/appwrite.ts`):**
-    * Installed the `react-native-appwrite` SDK.
-    * Created `lib/appwrite.ts` to initialize the Appwrite client and define database functions.
-    * Configured the Appwrite client using environment variables.
-    * Implemented `getAllNotes` function to retrieve all notes from the database.
-    * Implemented `getNotesById` function to retrieve a specific note by id.
-    * Implemented `addNote` function to add a new note to the database.
+      import React from "react";
+      import images from "@/constants/images";
 
-    ```typescript
-    import { Client, Databases, ID } from "react-native-appwrite";
-    export const config = {
-      platform: "com.skb.noteapp",
-      endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
-      projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID,
-      databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASEID,
-      notesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_NOTES_COLLECTIONID,
-    };
-
-    export const client = new Client();
-
-    client
-      .setEndpoint(config.endpoint!)
-      .setProject(config.projectId!)
-      .setPlatform(config.platform!);
-
-    const databases = new Databases(client);
-
-    export async function getAllNotes() {
-      try {
-        const result = await databases.listDocuments(
-          config.databaseId!,
-          config.notesCollectionId!
+      const NotFound = () => {
+        return (
+          <View className="flex-1 justify-center items-center">
+          <Image
+                  source={images.notFound}
+                  className="w-56 h-56"
+                  resizeMode="contain"
+                />
+          <Text className="text-white text-lg mt-4 font-nunito">
+          Could'nt found any results
+          </Text>
+          </View>
         );
+      };
 
-        return result.documents;
-      } catch (error) {
-        console.log(error);
-      }
-    }
+      export default NotFound;
 
-    export async function getNotesById(id: string) {
-      try {
-        const note = await databases.getDocument(
-          config.databaseId!,
-          config.notesCollectionId!,
-          id
-        );
-        return note;
-      } catch (error) {}
-    }
+      ```
 
-    export async function addNote(title: string, content: string, color: string) {
-      try {
-        await databases.createDocument(
-          config.databaseId!,
-          config.notesCollectionId!,
-          ID.unique(),
-          {
-            title: title,
-            content: content,
-            color: color,
-          }
-        );
-        return console.log("Notes Added");
-      } catch (error) {
-        console.log("Error in adding notes:", error);
-      }
-    }
-    ```
+- **Empty Component:**
+
+  - Created an `Empty` component (likely `Empty.tsx` in the `components` directory).
+  - This component displays a message indicating that a list or data set is empty.
+  - It may include an icon or image to visually represent the "empty" state.
+  - Used Tailwind CSS classes for styling.
+
+  ```typescript
+  // components/Empty.tsx (Example)
+  import { View, Text, Image } from "react-native";
+  import React from "react";
+  import images from "@/constants/images";
+
+  const Empty = () => {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Image
+          source={images.notesImg}
+          className="w-56 h-56"
+          resizeMode="contain"
+        />
+        <Text className="text-white text-lg mt-4 font-nunito">Create your first note</Text>
+      </View>
+    );
+  };
+
+  export default Empty;
+
+  ```
 
 </details>
 
-<details>
-<summary><strong>Purpose</strong></summary>
+* **Purpose**
 
-This commit establishes the backend infrastructure for the application, enabling persistent storage and retrieval of notes using Appwrite.
-</details>
+This commit improves the user experience by providing clear visual feedback when data is not found or when lists are empty. These components can be reused throughout the application.
 
-<details>
-<summary><strong>Next Steps</strong></summary>
 
-* Integrate the Appwrite functions into the application's UI components (Home, Add Notes, etc.).
-* Implement error handling and loading states for Appwrite requests.
-* Add functionality to update and delete notes.
-* Secure Appwrite API keys and database access.
-* Test Appwrite integration thoroughly.
-* Implement Appwrite authentication.
-</details>
+
+- Integrate the `NotFound` and `Empty` components into appropriate parts of the application (e.g., search results, note lists).
+- Add props to customize the messages or icons displayed by these components.
+- Test the components with various data scenarios.
+- Add better styling if needed.

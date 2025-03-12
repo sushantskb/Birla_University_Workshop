@@ -1,3 +1,4 @@
+import Empty from "@/components/Empty";
 import { notes } from "@/constants/data";
 import icons from "@/constants/icons";
 import { router } from "expo-router";
@@ -49,29 +50,33 @@ export default function Index() {
         </View>
 
         {/* Notes List */}
-        <SwipeListView
-          data={notesList}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View
-              className={`p-4 my-2 rounded-lg`}
-              style={colorStyles[item.color as ColorType]}>
-              <Text className="text-lg font-nunito">{item.text}</Text>
-            </View>
-          )}
-          renderHiddenItem={({ item }) => (
-            <View className="justify-center items-center bg-red-500 rounded-lg m-2 px-4 py-[5px] absolute top-0 bottom-0 right-0">
-              <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                <Image
-                  source={icons.trash}
-                  className="size-12"
-                  tintColor="white"
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-          rightOpenValue={-75}
-        />
+        {notesList.length > 0 ? (
+          <Empty />
+        ) : (
+          <SwipeListView
+            data={notesList}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View
+                className={`p-4 my-2 rounded-lg`}
+                style={colorStyles[item.color as ColorType]}>
+                <Text className="text-lg font-nunito">{item.text}</Text>
+              </View>
+            )}
+            renderHiddenItem={({ item }) => (
+              <View className="justify-center items-center bg-red-500 rounded-lg m-2 px-4 py-[5px] absolute top-0 bottom-0 right-0">
+                <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                  <Image
+                    source={icons.trash}
+                    className="size-12"
+                    tintColor="white"
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+            rightOpenValue={-75}
+          />
+        )}
 
         {/* Add Notes */}
         <View className="absolute bottom-6 right-6 bg-secondary p-4  rounded-full shadow-2xl">
