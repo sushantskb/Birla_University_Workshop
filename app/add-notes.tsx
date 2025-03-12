@@ -1,22 +1,29 @@
+import CustomModal from "@/components/Modal";
+import TextEditor from "@/components/TextEditor";
+import icons from "@/constants/icons";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
-  View,
-  Text,
+  Image,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  Image,
+  View,
 } from "react-native";
-import React, { useState } from "react";
-import icons from "@/constants/icons";
-import { router } from "expo-router";
-import TextEditor from "@/components/TextEditor";
 
 const AddNotes = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [color, setColor] = useState("");
+  const [modalText, setModalText] = useState("");
+  const [modal, setModal] = useState<boolean>(false);
+  const handlePress = () => {
+    setModalText("Save Changes");
+    setModal(true);
+  };
   const handleSave = () => {
     console.log("Title", title, "Content", content, "Color", color);
+    router.push("/");
   };
   return (
     <KeyboardAvoidingView
@@ -38,7 +45,7 @@ const AddNotes = () => {
           </TouchableOpacity>
           <TouchableOpacity
             className="bg-secondary p-2 rounded-full"
-            onPress={handleSave}>
+            onPress={handlePress}>
             <Image source={icons.save} className="size-6" tintColor="white" />
           </TouchableOpacity>
         </View>
@@ -52,6 +59,15 @@ const AddNotes = () => {
         setContent={setContent}
         setColor={setColor}
       />
+
+      {modal && (
+        <CustomModal
+          visible={modal}
+          text={modalText}
+          onClose={() => setModal(false)}
+          onSave={handleSave}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
