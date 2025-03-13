@@ -29,7 +29,7 @@ export async function getAllNotes() {
   }
 }
 
-export async function getNotesById(id: string) {
+export async function getNotesById({ id }: { id: string }) {
   try {
     const note = await databases.getDocument(
       config.databaseId!,

@@ -1,6 +1,6 @@
 import Empty from "@/components/Empty";
 import icons from "@/constants/icons";
-import { getAllNotes } from "@/lib/appwrite";
+import { deleteNote, getAllNotes } from "@/lib/appwrite";
 import { useAppwrite } from "@/lib/useAppwrite";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -41,7 +41,8 @@ export default function Index() {
     }
   }, [notesData]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await deleteNote(id);
     setNotesList((prevNotes) => prevNotes.filter((note) => note.$id !== id));
   };
 

@@ -6,20 +6,36 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import icons from "@/constants/icons";
 import TextEditor from "@/components/TextEditor";
 import CustomModal from "@/components/Modal";
+import { useAppwrite } from "@/lib/useAppwrite";
+import { editNote, getAllNotes, getNotesById } from "@/lib/appwrite";
 
 const EditNotes = () => {
   const { id } = useLocalSearchParams();
-  console.log("Note Id", id);
+
+  const { data: noteData, loading: noteLoading } = useAppwrite({
+    fn: getNotesById,
+    params: {
+      id: id!,
+    },
+  });
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [color, setColor] = useState("");
   const [modalText, setModalText] = useState("");
+
+  useEffect(() => {
+    if (noteData) {
+      setTitle(noteData.title);
+      setContent(noteData.content);
+      setColor(noteData.color);
+    }
+  }, [noteData]);
 
   const [modal, setModal] = useState(false);
   const handlePress = () => {
@@ -28,7 +44,13 @@ const EditNotes = () => {
   };
 
   const handleSave = async () => {
-    console.log("Title", title, "Content", content, "Color", color);
+    // console.log("Title", title, "Content", content, "Color", color);
+    try {
+      await editNote(id, title, content, color);
+      router.push("/");
+    } catch (error) {
+      console.log("Error in editing the note:", error);
+    }
   };
   return (
     <KeyboardAvoidingView
