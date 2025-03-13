@@ -1,81 +1,173 @@
-# Created NotFound and Empty Components
+#  Integrated Appwrite Data Fetching and CRUD Operations
 
-This commit introduces `NotFound` and `Empty` components to handle scenarios where data is missing or not found.
+This commit integrates Appwrite data fetching and CRUD (Create, Read, Update, Delete) operations into the application, enhancing data management capabilities.
 
 <details>
 <summary><strong>Changes</strong></summary>
 
-- **NotFound Component:**
-  _ Created a `NotFound` component (likely `NotFound.tsx` in the `components` directory).
-  _ This component displays a message indicating that requested data or content was not found.
-  _ It may include an icon or image to visually represent the "not found" state.
-  _ Used Tailwind CSS classes for styling.
+* **`useAppwrite` Hook (`lib/useAppwrite.ts`):**
+    * Created a custom hook `useAppwrite` to handle Appwrite data fetching.
+    * This hook manages loading states, errors, and data retrieval.
+    * It also provides a `refetch` function to manually trigger data fetching.
+    * Added error handling and alert display.
 
-      ```typescript
-      // components/NotFound.tsx (Example)
-      import { View, Text, Image } from "react-native";
+    ```typescript
+    import { Alert } from "react-native";
+    import { useEffect, useState, useCallback } from "react";
 
-      import React from "react";
-      import images from "@/constants/images";
+    interface UseAppwriteOptions<T, P extends Record<string, string | number>> {
+      fn: (params: P) => Promise<T>;
+      params?: P;
+      skip?: boolean;
+    }
 
-      const NotFound = () => {
-        return (
-          <View className="flex-1 justify-center items-center">
-          <Image
-                  source={images.notFound}
-                  className="w-56 h-56"
-                  resizeMode="contain"
-                />
-          <Text className="text-white text-lg mt-4 font-nunito">
-          Could'nt found any results
-          </Text>
-          </View>
-        );
-      };
+    interface UseAppwriteReturn<T, P> {
+      data: T | null;
+      loading: boolean;
+      error: string | null;
+      refetch: (newParams: P) => Promise<void>;
+    }
 
-      export default NotFound;
+    export const useAppwrite = <T, P extends Record<string, string | number>>({
+      fn,
+      params = {} as P,
+      skip = false,
+    }: UseAppwriteOptions<T, P>): UseAppwriteReturn<T, P> => {
+      const [data, setData] = useState<T | null>(null);
+      const [loading, setLoading] = useState(!skip);
+      const [error, setError] = useState<string | null>(null);
 
-      ```
+      const fetchData = useCallback(
+        async (fetchParams: P) => {
+          setLoading(true);
+          setError(null);
 
-- **Empty Component:**
+          try {
+            const result = await fn(fetchParams);
+            setData(result);
+          } catch (err: unknown) {
+            const errorMessage =
+              err instanceof Error ? err.message : "An unknown error occurred";
+            setError(errorMessage);
+            Alert.alert("Error", errorMessage);
+          } finally {
+            setLoading(false);
+          }
+        },
+        [fn]
+      );
 
-  - Created an `Empty` component (likely `Empty.tsx` in the `components` directory).
-  - This component displays a message indicating that a list or data set is empty.
-  - It may include an icon or image to visually represent the "empty" state.
-  - Used Tailwind CSS classes for styling.
+      useEffect(() => {
+        if (!skip) {
+          fetchData(params);
+        }
+      }, []);
 
-  ```typescript
-  // components/Empty.tsx (Example)
-  import { View, Text, Image } from "react-native";
-  import React from "react";
-  import images from "@/constants/images";
+      const refetch = async (newParams: P) => await fetchData(newParams);
 
-  const Empty = () => {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Image
-          source={images.notesImg}
-          className="w-56 h-56"
-          resizeMode="contain"
-        />
-        <Text className="text-white text-lg mt-4 font-nunito">Create your first note</Text>
-      </View>
-    );
-  };
+      return { data, loading, error, refetch };
+    };
+    ```
 
-  export default Empty;
+* **`app.json` Updates:**
+    * Added `package` property for android builds.
 
-  ```
+    ```json
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.skb.noteapp"
+    },
+    ```
+
+* **Home Screen Integration (`index.tsx`):**
+    * Integrated `getAllNotes` function using the `useAppwrite` hook to fetch notes data.
+    * Used `useEffect` to format and update the `notesList` state when `notesData` changes.
+    * Displayed an `Empty` component when the `notesList` is empty.
+    * Added navigation to edit note page.
+    * Added navigation to the search page.
+
+    ```typescript
+    // index.tsx
+    import Empty from "@/components/Empty";
+    import icons from "@/constants/icons";
+    import { getAllNotes } from "@/lib/appwrite";
+    import { useAppwrite } from "@/lib/useAppwrite";
+    import { router } from "expo-router";
+    import { useEffect, useState } from "react";
+    import { Image, Text, TouchableOpacity, View } from "react-native";
+    import { GestureHandlerRootView } from "react-native-gesture-handler";
+    import { SwipeListView } from "react-native-swipe-list-view";
+
+    // ... (rest of the code)
+    ```
+
+* **Add Notes Screen Integration (`add-notes.tsx`):**
+    * Integrated `addNote` function to save new notes to Appwrite.
+    * Handled save operation inside the modal confirm.
+    * Added error handling for the `addNote` function.
+
+    ```typescript
+    // add-notes.tsx
+    import CustomModal from "@/components/Modal";
+    import TextEditor from "@/components/TextEditor";
+    import icons from "@/constants/icons";
+    import { addNote } from "@/lib/appwrite";
+    import { router } from "expo-router";
+    import React, { useState } from "react";
+    import {
+      Image,
+      KeyboardAvoidingView,
+      Platform,
+      TouchableOpacity,
+      View,
+    } from "react-native";
+
+    // ... (rest of the code)
+    ```
+
+* **Edit Notes Screen Implementation (`edit-notes/[id].tsx`):**
+    * Created a new screen for editing notes, using `useLocalSearchParams` to get the note ID.
+    * Implemented basic structure and state management.
+    * Added modal integration.
+
+    ```typescript
+    // edit-notes/[id].tsx
+    import {
+      View,
+      Text,
+      KeyboardAvoidingView,
+      Platform,
+      TouchableOpacity,
+      Image,
+    } from "react-native";
+    import React, { useState } from "react";
+    import { router, useLocalSearchParams } from "expo-router";
+    import icons from "@/constants/icons";
+    import TextEditor from "@/components/TextEditor";
+    import CustomModal from "@/components/Modal";
+
+    // ... (rest of the code)
+    ```
 
 </details>
 
-* **Purpose**
+<details>
+<summary><strong>Purpose</strong></summary>
 
-This commit improves the user experience by providing clear visual feedback when data is not found or when lists are empty. These components can be reused throughout the application.
+This commit enhances the application's functionality by integrating Appwrite data fetching and CRUD operations, enabling persistent data management and a more dynamic user experience.
+</details>
 
+<details>
+<summary><strong>Next Steps</strong></summary>
 
-
-- Integrate the `NotFound` and `Empty` components into appropriate parts of the application (e.g., search results, note lists).
-- Add props to customize the messages or icons displayed by these components.
-- Test the components with various data scenarios.
-- Add better styling if needed.
+* Implement update and delete note functionalities.
+* Add loading and error handling indicators in the UI.
+* Implement detailed note view.
+* Implement search functionality using appwrite.
+* Refine the UI/UX of the edit notes screen.
+* Add more robust error handling.
+* Add better styling.
+</details>

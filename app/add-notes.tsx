@@ -1,6 +1,7 @@
 import CustomModal from "@/components/Modal";
 import TextEditor from "@/components/TextEditor";
 import icons from "@/constants/icons";
+import { addNote } from "@/lib/appwrite";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -21,9 +22,14 @@ const AddNotes = () => {
     setModalText("Save Changes");
     setModal(true);
   };
-  const handleSave = () => {
-    console.log("Title", title, "Content", content, "Color", color);
-    router.push("/");
+  const handleSave = async () => {
+    // console.log("Title", title, "Content", content, "Color", color);
+    try {
+      await addNote(title, content, color);
+      router.push("/");
+    } catch (error) {
+      console.log("Error in adding notes:", error);
+    }
   };
   return (
     <KeyboardAvoidingView
