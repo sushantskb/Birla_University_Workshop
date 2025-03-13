@@ -1,4 +1,4 @@
-import { Client, Databases, ID } from "react-native-appwrite";
+import { Client, Databases, ID, Query } from "react-native-appwrite";
 export const config = {
   platform: "com.skb.noteapp",
   endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
@@ -58,3 +58,51 @@ export async function addNote(title: string, content: string, color: string) {
   }
 }
 
+export async function editNote(
+  noteId: string,
+  title: string,
+  content: string,
+  color: string
+) {
+  try {
+    await databases.updateDocument(
+      config.databaseId!,
+      config.notesCollectionId!,
+      noteId,
+      {
+        title: title,
+        content: content,
+        color: color,
+      }
+    );
+    console.log("Note Updated");
+  } catch (error) {
+    console.log("Error occured while updating the notes:", error);
+  }
+}
+
+export async function deleteNote(noteId: string) {
+  try {
+    await databases.deleteDocument(
+      config.databaseId!,
+      config.notesCollectionId!,
+      noteId
+    );
+    console.log("Note Deleted");
+  } catch (error) {
+    console.log("Error occured while deleting the notes:", error);
+  }
+}
+
+export async function searchNotes(query: string) {
+  try {
+    const result = await databases.listDocuments(
+      config.databaseId!,
+      config.notesCollectionId!,
+      [Query.search("title", query)]
+    );
+    return result.documents;
+  } catch (error) {
+    console.log("Error occured while searching notes:", error);
+  }
+}
