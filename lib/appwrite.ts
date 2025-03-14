@@ -94,7 +94,7 @@ export async function deleteNote(noteId: string) {
   }
 }
 
-export async function searchNotes(query: string) {
+export async function searchNotes({ query }: { query: string }) {
   try {
     const result = await databases.listDocuments(
       config.databaseId!,

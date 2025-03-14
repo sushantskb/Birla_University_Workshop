@@ -1,94 +1,124 @@
-#  Integrated `deleteNote`, `getNotesById`, and `editNote` Functions; Fixed Appwrite Syntax
+#  Integrated Search Functionality
 
-This commit completes the integration of CRUD operations by implementing the `deleteNote`, `getNotesById`, and `editNote` functions, and also addresses a syntax issue in the `getNotesById` Appwrite function.
+This commit integrates the search functionality, allowing users to search notes by title.
 
 <details>
 <summary><strong>Changes</strong></summary>
 
-* **Home Screen Integration (`index.tsx`):**
-    * Integrated the `deleteNote` function into the `handleDelete` function.
-    * When a note is deleted, the `deleteNote` function is called to remove it from Appwrite, and the local `notesList` state is updated.
+* **Search Screen Implementation (`search.tsx`):**
+    * Created a `Search` screen to handle note searching.
+    * Used `useLocalSearchParams` to get the search query from the URL.
+    * Implemented a `search` state variable to track the current search input.
+    * Used `useDebouncedCallback` to debounce the search input, reducing the number of API calls.
+    * Integrated the `searchNotes` function using the `useAppwrite` hook to fetch search results.
+    * Used `useEffect` to trigger a refetch of search results when the `params.query` changes.
+    * Rendered the search results using a `FlatList`.
+    * Displayed a `NotFound` component when no search results are found and a query is present.
+    * Added a `TextInput` for search input with debounced updates to URL parameters.
+    * Implemented color styles for notes.
 
     ```typescript
-    // index.tsx
-    import { ... } from 'react-native';
-    import { ... } from 'expo-router';
-    import { deleteNote } from '@/lib/appwrite';
-    // ...
+    // search.tsx
+    import NotFound from "@/components/NotFound";
+    import { searchNotes } from "@/lib/appwrite";
+    import { useAppwrite } from "@/lib/useAppwrite";
+    import { router, useLocalSearchParams } from "expo-router";
+    import React, { useEffect, useState } from "react";
+    import {
+      FlatList,
+      Text,
+      TextInput,
+      TouchableOpacity,
+      View,
+    } from "react-native";
+    import { useDebouncedCallback } from "use-debounce";
 
-    const handleDelete = async (id: string) => {
-      await deleteNote(id);
-      setNotesList((prevNotes) => prevNotes.filter((note) => note.$id !== id));
-    };
+    export default function Search() {
+      type ColorType = "red" | "green" | "yellow" | "blue" | "purple";
+      const colorStyles: Record<ColorType, { backgroundColor: string }> = {
+        red: { backgroundColor: "#fca5a5" },
+        green: { backgroundColor: "#86efac" },
+        yellow: { backgroundColor: "#fde047" },
+        blue: { backgroundColor: "#93c5fd" },
+        purple: { backgroundColor: "#d8b4fe" },
+      };
 
-    // ... (rest of the code)
+      const params = useLocalSearchParams<{ query?: string }>();
+      const [search, setSearch] = useState<string>(params.query || "");
+      const debouncedSearch = useDebouncedCallback(
+        (text: string) => router.setParams({ query: text }),
+        500
+      );
+      const handleSearch = (text: string) => {
+        setSearch(text);
+        debouncedSearch(text);
+      };
+
+      const { data, refetch } = useAppwrite({
+        fn: searchNotes,
+        params: { query: params.query || "" },
+        skip: !!params.query,
+      });
+      useEffect(() => {
+        refetch({
+          query: params.query || "",
+        });
+      }, [params.query]);
+
+      return (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.$id}
+          renderItem={({ item }) => (
+            <View
+              className={`p-4 my-2 rounded-lg`}
+              style={colorStyles[item.color as ColorType]}>
+              <TouchableOpacity>
+                <Text className="text-lg font-nunito">{item.title}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          contentContainerClassName="flex-1 bg-primary justify-center items-center px-4 "
+          ListHeaderComponent={
+            <View className="w-full">
+              <View className="w-full flex-row items-center bg-secondary rounded-full px-4 py-2">
+                <TextInput
+                  className="flex-1 text-white text-xl font-nunito"
+                  placeholder="Search by title..."
+                  placeholderTextColor={"#a1a1a1"}
+                  value={search}
+                  onChangeText={handleSearch}
+                />
+              </View>
+            </View>
+          }
+          ListEmptyComponent={
+            params.query && data?.length === 0 ? <NotFound /> : null
+          }
+        />
+      );
+    }
     ```
 
-* **Edit Notes Screen Integration (`edit-notes/[id].tsx`):**
-    * Integrated the `getNotesById` function using `useAppwrite` to fetch the note data based on the `id` from `useLocalSearchParams`.
-    * Used `useEffect` to populate the `title`, `content`, and `color` state variables with the fetched note data.
-    * Implemented the `editNote` function in the `handleSave` function to update the note in Appwrite.
-    * Added error handling for the `editNote` function.
-
-    ```typescript
-    // edit-notes/[id].tsx
-    import { ... } from 'react-native';
-    import { ... } from 'expo-router';
-    import { getNotesById, editNote } from '@/lib/appwrite';
-    import { useAppwrite } from '@/lib/useAppwrite';
-    import React, { useState, useEffect } from 'react';
-    // ...
-
-    const { id } = useLocalSearchParams();
-    const { data: noteData, loading: noteLoading } = useAppwrite({
-      fn: getNotesById,
-      params: {
-        id: id!,
-      },
-    });
-
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
-    const [color, setColor] = useState("");
-    const [modalText, setModalText] = useState("");
-
-    useEffect(() => {
-      if (noteData) {
-        setTitle(noteData.title);
-        setContent(noteData.content);
-        setColor(noteData.color);
-      }
-    }, [noteData]);
-
-    const handleSave = async () => {
-      try {
-        await editNote(id, title, content, color);
-        router.push("/");
-      } catch (error) {
-        console.log("Error in editing the note:", error);
-      }
-    };
-
-    // ... (rest of the code)
-    ```
-
-* **Appwrite Syntax Fix (`lib/appwrite.ts`):**
-    * Corrected the `getNotesById` function signature to accept an object with an `id` property, ensuring proper parameter passing.
+* **Appwrite Function Fix (`lib/appwrite.ts`):**
+    * Corrected the `searchNotes` function signature to accept an object with a `query` property.
 
     ```typescript
     // lib/appwrite.ts
-    import { Client, Databases, ID } from "react-native-appwrite";
+    import { Client, Databases, ID, Query } from "react-native-appwrite";
     // ...
 
-    export async function getNotesById({ id }: { id: string }) {
+    export async function searchNotes({ query }: { query: string }) {
       try {
-        const note = await databases.getDocument(
+        const result = await databases.listDocuments(
           config.databaseId!,
           config.notesCollectionId!,
-          id
+          [Query.search("title", query)]
         );
-        return note;
-      } catch (error) {}
+        return result.documents;
+      } catch (error) {
+        console.log("Error occured while searching notes:", error);
+      }
     }
 
     // ... (rest of the code)
@@ -99,17 +129,16 @@ This commit completes the integration of CRUD operations by implementing the `de
 <details>
 <summary><strong>Purpose</strong></summary>
 
-This commit completes the integration of core data management functionalities, allowing users to create, read, update, and delete notes. It also addresses a syntax error in the Appwrite function, ensuring proper data retrieval.
+This commit adds a search screen with a search bar and displays search results. It enables users to easily find notes by their titles.
 </details>
 
 <details>
 <summary><strong>Next Steps</strong></summary>
 
-* Integrate the `searchNotes` function into the Search screen.
-* Add loading and error handling indicators in the UI for all Appwrite operations.
-* Implement detailed note view.
-* Enhance UI/UX for better user experience.
-* Add more robust error handling.
+* Add loading indicators during search.
+* Implement better error handling for search.
+* Enhance the UI/UX of the search screen.
+* Add navigation to the selected note from the search result.
 * Add better styling.
-* Add loading states for all network requests.
+* Add search by content feature.
 </details>
