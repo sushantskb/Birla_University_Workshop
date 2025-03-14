@@ -4,7 +4,13 @@ import { deleteNote, getAllNotes } from "@/lib/appwrite";
 import { useAppwrite } from "@/lib/useAppwrite";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SwipeListView } from "react-native-swipe-list-view";
 
@@ -24,7 +30,7 @@ export default function Index() {
     blue: { backgroundColor: "#93c5fd" },
     purple: { backgroundColor: "#d8b4fe" },
   };
-  const { data: notesData } = useAppwrite({
+  const { data: notesData, loading } = useAppwrite({
     fn: getAllNotes,
   });
 
@@ -77,6 +83,12 @@ export default function Index() {
         {/* Notes List */}
         {notesList.length === 0 ? (
           <Empty />
+        ) : loading ? (
+          <ActivityIndicator
+            className="flex items-center justify-center h-full"
+            size={42}
+            color="yellow"
+          />
         ) : (
           <SwipeListView
             data={notesList}

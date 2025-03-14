@@ -1,144 +1,149 @@
-#  Integrated Search Functionality
+# My Notes App
 
-This commit integrates the search functionality, allowing users to search notes by title.
+This is a simple yet powerful notes application built with React Native and Expo, utilizing Appwrite for backend services. It provides a clean and intuitive interface for managing your notes, complete with CRUD operations and search functionality.
 
-<details>
-<summary><strong>Changes</strong></summary>
+## Features
 
-* **Search Screen Implementation (`search.tsx`):**
-    * Created a `Search` screen to handle note searching.
-    * Used `useLocalSearchParams` to get the search query from the URL.
-    * Implemented a `search` state variable to track the current search input.
-    * Used `useDebouncedCallback` to debounce the search input, reducing the number of API calls.
-    * Integrated the `searchNotes` function using the `useAppwrite` hook to fetch search results.
-    * Used `useEffect` to trigger a refetch of search results when the `params.query` changes.
-    * Rendered the search results using a `FlatList`.
-    * Displayed a `NotFound` component when no search results are found and a query is present.
-    * Added a `TextInput` for search input with debounced updates to URL parameters.
-    * Implemented color styles for notes.
+* **Create (C):** Easily add new notes with titles and content.
+* **Read (R):** View your notes with detailed content.
+* **Update (U):** Edit existing notes to keep them up-to-date.
+* **Delete (D):** Remove notes you no longer need.
+* **Search:** Quickly find notes by searching for keywords in titles or content.
+* **Appwrite Backend:** Leverages Appwrite for secure and scalable data storage and retrieval.
+* **Custom UI Components:** Utilizes custom components for a consistent and user-friendly experience.
+* **Responsive Design:** Adapts to various screen sizes for optimal viewing.
 
-    ```typescript
-    // search.tsx
-    import NotFound from "@/components/NotFound";
-    import { searchNotes } from "@/lib/appwrite";
-    import { useAppwrite } from "@/lib/useAppwrite";
-    import { router, useLocalSearchParams } from "expo-router";
-    import React, { useEffect, useState } from "react";
-    import {
-      FlatList,
-      Text,
-      TextInput,
-      TouchableOpacity,
-      View,
-    } from "react-native";
-    import { useDebouncedCallback } from "use-debounce";
+## Technologies Used
 
-    export default function Search() {
-      type ColorType = "red" | "green" | "yellow" | "blue" | "purple";
-      const colorStyles: Record<ColorType, { backgroundColor: string }> = {
-        red: { backgroundColor: "#fca5a5" },
-        green: { backgroundColor: "#86efac" },
-        yellow: { backgroundColor: "#fde047" },
-        blue: { backgroundColor: "#93c5fd" },
-        purple: { backgroundColor: "#d8b4fe" },
-      };
+* **React Native & Expo:** For cross-platform mobile development.
+* **Appwrite:** For backend services (database, authentication, etc.).
+* **TypeScript:** For static typing and improved code quality.
+* **NativeWind:** For Tailwind CSS in React Native.
+* **React Native Paper (potentially, if you use it in TextEditor, or Modal) :** For UI components.
+* **Custom Components:** For reusable UI elements.
 
-      const params = useLocalSearchParams<{ query?: string }>();
-      const [search, setSearch] = useState<string>(params.query || "");
-      const debouncedSearch = useDebouncedCallback(
-        (text: string) => router.setParams({ query: text }),
-        500
-      );
-      const handleSearch = (text: string) => {
-        setSearch(text);
-        debouncedSearch(text);
-      };
+## Project Structure
+Markdown
 
-      const { data, refetch } = useAppwrite({
-        fn: searchNotes,
-        params: { query: params.query || "" },
-        skip: !!params.query,
-      });
-      useEffect(() => {
-        refetch({
-          query: params.query || "",
-        });
-      }, [params.query]);
+# My Notes App
 
-      return (
-        <FlatList
-          data={data}
-          keyExtractor={(item) => item.$id}
-          renderItem={({ item }) => (
-            <View
-              className={`p-4 my-2 rounded-lg`}
-              style={colorStyles[item.color as ColorType]}>
-              <TouchableOpacity>
-                <Text className="text-lg font-nunito">{item.title}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          contentContainerClassName="flex-1 bg-primary justify-center items-center px-4 "
-          ListHeaderComponent={
-            <View className="w-full">
-              <View className="w-full flex-row items-center bg-secondary rounded-full px-4 py-2">
-                <TextInput
-                  className="flex-1 text-white text-xl font-nunito"
-                  placeholder="Search by title..."
-                  placeholderTextColor={"#a1a1a1"}
-                  value={search}
-                  onChangeText={handleSearch}
-                />
-              </View>
-            </View>
-          }
-          ListEmptyComponent={
-            params.query && data?.length === 0 ? <NotFound /> : null
-          }
-        />
-      );
-    }
+This is a simple yet powerful notes application built with React Native and Expo, utilizing Appwrite for backend services. It provides a clean and intuitive interface for managing your notes, complete with CRUD operations and search functionality.
+
+## Features
+
+* **Create (C):** Easily add new notes with titles and content.
+* **Read (R):** View your notes with detailed content.
+* **Update (U):** Edit existing notes to keep them up-to-date.
+* **Delete (D):** Remove notes you no longer need.
+* **Search:** Quickly find notes by searching for keywords in titles or content.
+* **Appwrite Backend:** Leverages Appwrite for secure and scalable data storage and retrieval.
+* **Custom UI Components:** Utilizes custom components for a consistent and user-friendly experience.
+* **Responsive Design:** Adapts to various screen sizes for optimal viewing.
+
+## Technologies Used
+
+* **React Native & Expo:** For cross-platform mobile development.
+* **Appwrite:** For backend services (database, authentication, etc.).
+* **TypeScript:** For static typing and improved code quality.
+* **NativeWind:** For Tailwind CSS in React Native.
+* **React Native Paper (potentially, if you use it in TextEditor, or Modal) :** For UI components.
+* **Custom Components:** For reusable UI elements.
+
+## Project Structure
+
+├── .gitignore
+├── README.md
+├── app.json
+├── app
+│   ├── _layout.tsx         # Root layout for navigation
+│   ├── add-notes.tsx      # Component for adding new notes
+│   ├── edit-notes
+│   │   └── [id].tsx      # Component for editing existing notes
+│   ├── global.css         # Global CSS styles
+│   ├── index.tsx          # Main application entry point
+│   ├── notes
+│   │   └── [id].tsx      # Component for viewing a single note
+│   └── search.tsx         # Component for searching notes
+├── assets
+│   ├── fonts             # Custom fonts
+│   │   ├── Nunito-Black.ttf
+│   │   ├── Nunito-Bold.ttf
+│   │   ├── Nunito-ExtraBold.ttf
+│   │   ├── Nunito-ExtraLight.ttf
+│   │   ├── Nunito-Light.ttf
+│   │   ├── Nunito-Regular.ttf
+│   │   └── Nunito-SemiBold.ttf
+│   ├── icons             # Application icons
+│   │   ├── back.png
+│   │   ├── eye.png
+│   │   ├── info.png
+│   │   ├── plus.png
+│   │   ├── save.png
+│   │   ├── search.png
+│   │   └── trash.png
+│   └── images            # Application images
+│   │   ├── favicon.png
+│   │   ├── icon.png
+│   │   ├── not-found.png
+│   │   └── splash-icon.png
+├── babel.config.js
+├── components
+│   ├── Empty.tsx         # Component for displaying an empty state
+│   ├── Modal.tsx         # Reusable modal component
+│   ├── NotFound.tsx      # Component for displaying a "not found" message
+│   └── TextEditor.tsx    # Component for text editing
+├── constants
+│   ├── data.ts           # Constant data
+│   ├── icons.ts          # Icon constants
+│   └── images.ts         # Image constants
+├── image.d.ts
+├── lib
+│   ├── appwrite.ts       # Appwrite client initialization
+│   └── useAppwrite.ts    # Custom hook for Appwrite integration
+├── metro.config.js
+├── nativewind-env.d.ts
+├── package-lock.json
+├── package.json
+├── tailwind.config.js
+└── tsconfig.json
+
+## Getting Started
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone <repository_url>
+    cd <project_directory>
     ```
 
-* **Appwrite Function Fix (`lib/appwrite.ts`):**
-    * Corrected the `searchNotes` function signature to accept an object with a `query` property.
+2.  **Install dependencies:**
 
-    ```typescript
-    // lib/appwrite.ts
-    import { Client, Databases, ID, Query } from "react-native-appwrite";
-    // ...
-
-    export async function searchNotes({ query }: { query: string }) {
-      try {
-        const result = await databases.listDocuments(
-          config.databaseId!,
-          config.notesCollectionId!,
-          [Query.search("title", query)]
-        );
-        return result.documents;
-      } catch (error) {
-        console.log("Error occured while searching notes:", error);
-      }
-    }
-
-    // ... (rest of the code)
+    ```bash
+    npm install
+    # or
+    yarn install
     ```
 
-</details>
+3.  **Configure Appwrite:**
 
-<details>
-<summary><strong>Purpose</strong></summary>
+    * Create an Appwrite account and project.
+    * Update the `lib/appwrite.ts` file with your Appwrite project and endpoint details.
+    * Create a collection inside of Appwrite with the attributes needed for your notes.
+4.  **Run the application:**
 
-This commit adds a search screen with a search bar and displays search results. It enables users to easily find notes by their titles.
-</details>
+    ```bash
+    npx expo start
+    # or
+    yarn expo start
+    ```
 
-<details>
-<summary><strong>Next Steps</strong></summary>
+5.  **Use Expo Go app or a simulator to run the app.**
 
-* Add loading indicators during search.
-* Implement better error handling for search.
-* Enhance the UI/UX of the search screen.
-* Add navigation to the selected note from the search result.
-* Add better styling.
-* Add search by content feature.
-</details>
+## Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for bug fixes, feature requests, or improvements.
+
+
+## Author
+
+Sushant Kumar Bishoi
